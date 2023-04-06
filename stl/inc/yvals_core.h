@@ -475,6 +475,7 @@
 // * unique
 // * unique_copy
 
+#include <crtdefs.h>
 #include <vcruntime.h>
 #include <xkeycheck.h> // The _HAS_CXX tags must be defined before including this.
 
@@ -857,6 +858,60 @@ _EMIT_STL_ERROR(STL1001, "Unexpected compiler version, expected MSVC 19.36 or ne
 #if defined(_CPPRTTI) && !_HAS_STATIC_RTTI
 #error /GR implies _HAS_STATIC_RTTI.
 #endif // defined(_CPPRTTI) && !_HAS_STATIC_RTTI
+
+#if defined(MRTDLL) && defined(_CRTBLD)
+// process-global is the default for code built with /clr or /clr:oldSyntax.
+// appdomain-global is the default for code built with /clr:pure.
+// Code in MSVCM is built with /clr, but is used by user code built with /clr:pure
+// so it must conform to the expectations of /clr:pure clients.
+// Use __PURE_APPDOMAIN_GLOBAL when a global needs to be appdomain-global for pure
+// clients and process-global for mixed clients.
+#define __PURE_APPDOMAIN_GLOBAL __declspec(appdomain)
+#else
+#define __PURE_APPDOMAIN_GLOBAL
+#endif
+
+#ifndef _CRTIMP2_PURE
+#ifdef _M_CEE_PURE
+#define _CRTIMP2_PURE
+#else
+#define _CRTIMP2_PURE _CRTIMP2
+#endif
+#endif // _CRTIMP2_PURE
+
+#ifndef _CRTIMP2_IMPORT
+#if defined(CRTDLL2) && defined(_CRTBLD)
+#define _CRTIMP2_IMPORT __declspec(dllexport)
+#elif defined(_DLL) && !defined(_STATIC_CPPLIB)
+#define _CRTIMP2_IMPORT __declspec(dllimport)
+#else
+#define _CRTIMP2_IMPORT
+#endif
+#endif // _CRTIMP2_IMPORT
+
+#ifndef _CRTIMP2_PURE_IMPORT
+#ifdef _M_CEE_PURE
+#define _CRTIMP2_PURE_IMPORT
+#else
+#define _CRTIMP2_PURE_IMPORT _CRTIMP2_IMPORT
+#endif
+#endif // _CRTIMP2_PURE_IMPORT
+
+#ifndef _CRTIMP2_PURE_IMPORT_UNLESS_CODECVT_ID_SATELLITE
+#ifdef _BUILDING_SATELLITE_CODECVT_IDS
+#define _CRTIMP2_PURE_IMPORT_UNLESS_CODECVT_ID_SATELLITE
+#else
+#define _CRTIMP2_PURE_IMPORT_UNLESS_CODECVT_ID_SATELLITE _CRTIMP2_PURE_IMPORT
+#endif
+#endif // _CRTIMP2_PURE_IMPORT_UNLESS_CODECVT_ID_SATELLITE
+
+#ifndef _CRTDATA2_IMPORT
+#if defined(MRTDLL) && defined(_CRTBLD)
+#define _CRTDATA2_IMPORT
+#else
+#define _CRTDATA2_IMPORT _CRTIMP2_IMPORT
+#endif
+#endif // _CRTDATA2_IMPORT
 
 // N4842 [dcl.constexpr]/1: "A function or static data member declared with the
 // constexpr or consteval specifier is implicitly an inline function or variable"

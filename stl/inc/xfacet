@@ -1,4 +1,4 @@
-// xfacet internal header
+// xfacet internal header (core)
 
 // Copyright (c) Microsoft Corporation.
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
@@ -6,7 +6,7 @@
 #pragma once
 #ifndef _XFACET_
 #define _XFACET_
-#include <yvals.h>
+#include <yvals_core.h>
 #if _STL_COMPILER_PREPROCESSOR
 
 #pragma pack(push, _CRT_PACKING)
